@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "traveltribe-7ddea"
+  },
+  "targets": {
+    "traveltribe-7ddea": {
+      "hosting": {
+        "public": [
+          "traveltrust-public"
+        ],
+        "customer": [
+          "traveltribe-7ddea"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

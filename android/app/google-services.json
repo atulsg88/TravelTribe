@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1020213673968",
+    "firebase_url": "https://traveltribe-7ddea-default-rtdb.firebaseio.com",
+    "project_id": "traveltribe-7ddea",
+    "storage_bucket": "traveltribe-7ddea.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1020213673968:android:577bf0b8a1414c4762a735",
+        "android_client_info": {
+          "package_name": "com.example.traveltribe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvAV94U9yvBLrz7O3Rhu7duV28TDMeTxI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

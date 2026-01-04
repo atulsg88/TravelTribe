@@ -1,0 +1,40 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "traveltribe-7ddea",
+          "appId": "1:1020213673968:android:577bf0b8a1414c4762a735",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "traveltribe-7ddea",
+          "configurations": {
+            "android": "1:1020213673968:android:577bf0b8a1414c4762a735",
+            "ios": "1:1020213673968:ios:7ec6b955a21e570362a735",
+            "macos": "1:1020213673968:ios:7ec6b955a21e570362a735",
+            "web": "1:1020213673968:web:ec21dda88dce372f62a735",
+            "windows": "1:1020213673968:web:be9400cc4af7649462a735"
+          }
+        }
+      }
+    }
+  },
+  
+  "hosting": [
+    {
+      "target": "customer",
+      "public": "build/web_customer",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [{ "source": "**", "destination": "/index.html" }]
+    },
+    {
+      "target": "public",
+      "public": "build/web_public",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [{ "source": "**", "destination": "/index.html" }]
+    }
+  ]
+}
