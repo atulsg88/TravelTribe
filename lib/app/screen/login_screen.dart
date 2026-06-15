@@ -13,7 +13,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
-  
+
   bool _isOtpSent = false;
   bool _isLoading = false;
 
@@ -32,7 +32,10 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      var userDoc = await FirebaseFirestore.instance.collection('users').doc(email).get();
+      var userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(email)
+          .get();
 
       if (!userDoc.exists) {
         setState(() => _isLoading = false);
@@ -41,17 +44,22 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       // CORRECTED SMTP CONFIGURATION
-      EmailOTP.config(appName: "Travel Trust", otpLength: 4, otpType: OTPType.numeric);
+      EmailOTP.config(
+        appName: "Travel Trust",
+        otpLength: 4,
+        otpType: OTPType.numeric,
+      );
       EmailOTP.setSMTP(
         host: "smtp.gmail.com",
         emailPort: EmailPort.port587,
         secureType: SecureType.tls,
         username: "atulgirigosavi333@gmail.com", // Replace with your email
-        password: "pcpz nqvq ictj xzaz",    // Replace with your 16-digit App Password
+        password:
+            "pcpz nqvq ictj xzaz", // Replace with your 16-digit App Password
       );
 
       bool success = await EmailOTP.sendOTP(email: email);
-      
+
       if (!mounted) return;
       setState(() {
         _isLoading = false;
@@ -89,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
           context,
           MaterialPageRoute(
             builder: (context) => MainDashboard(
-              userRole: userDoc['role'], 
+              userRole: userDoc['role'],
               userEmail: _emailController.text.trim(),
             ),
           ),
@@ -112,32 +120,53 @@ class _LoginScreenState extends State<LoginScreen> {
           padding: const EdgeInsets.all(30.0),
           child: Column(
             children: [
-              const Icon(Icons.travel_explore, size: 80, color: Colors.blueGrey),
+              const Icon(
+                Icons.travel_explore,
+                size: 80,
+                color: Colors.blueGrey,
+              ),
               const SizedBox(height: 20),
-              const Text("Travel Trust", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+              const Text(
+                "Travel Trust",
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 40),
               TextField(
                 controller: _emailController,
                 enabled: !_isOtpSent,
-                decoration: const InputDecoration(labelText: "Email", border: OutlineInputBorder()),
+                decoration: const InputDecoration(
+                  labelText: "Email",
+                  border: OutlineInputBorder(),
+                ),
               ),
               if (_isOtpSent) ...[
                 const SizedBox(height: 15),
                 TextField(
                   controller: _otpController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: "OTP", border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: "OTP",
+                    border: OutlineInputBorder(),
+                  ),
                 ),
               ],
               const SizedBox(height: 25),
               SizedBox(
-                width: double.infinity, height: 50,
+                width: double.infinity,
+                height: 50,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : (_isOtpSent ? _login : _checkAndSendOtp),
-                  child: _isLoading ? const CircularProgressIndicator() : Text(_isOtpSent ? "LOGIN" : "SEND OTP"),
+                  onPressed: _isLoading
+                      ? null
+                      : (_isOtpSent ? _login : _checkAndSendOtp),
+                  child: _isLoading
+                      ? const CircularProgressIndicator()
+                      : Text(_isOtpSent ? "LOGIN" : "SEND OTP"),
                 ),
               ),
-              TextButton(onPressed: () => Navigator.pushNamed(context, '/register'), child: const Text("Register Now"))
+              TextButton(
+                onPressed: () => Navigator.pushNamed(context, '/register'),
+                child: const Text("Register Now"),
+              ),
             ],
           ),
         ),
