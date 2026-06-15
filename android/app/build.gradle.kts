@@ -49,8 +49,12 @@ android {
 
     buildTypes {
         getByName("release") {
-            // 3. Link the release config
-            signingConfig = signingConfigs.getByName("release")
+            // 3. Link the release config if key.properties is found, else fall back to debug signing
+            signingConfig = if (keystorePropertiesFile.exists() && keystoreProperties.getProperty("storeFile") != null) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
