@@ -8,6 +8,16 @@ class MyTokensList extends StatelessWidget {
   final String role;
   const MyTokensList({super.key, required this.userEmail, required this.role});
 
+  String _formatDate(DateTime date) {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    String day = date.day.toString().padLeft(2, '0');
+    String month = months[date.month - 1];
+    int hour = date.hour > 12 ? date.hour - 12 : (date.hour == 0 ? 12 : date.hour);
+    String minute = date.minute.toString().padLeft(2, '0');
+    String amPm = date.hour >= 12 ? 'PM' : 'AM';
+    return '$day $month ${date.year}, $hour:$minute $amPm';
+  }
+
   Future<void> _sendEmailLink(BuildContext context, String tokenId) async {
     final emailCtrl = TextEditingController();
     showDialog(
@@ -50,7 +60,18 @@ class MyTokensList extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) return const Center(child: Text("No tokens found."));
 
-        var docs = snapshot.data!.docs;
+        var docs = snapshot.data!.docs.toList();
+        // Sort by createdAt descending (latest first)
+        docs.sort((a, b) {
+          var dataA = a.data() as Map<String, dynamic>;
+          var dataB = b.data() as Map<String, dynamic>;
+          Timestamp? tsA = dataA['createdAt'];
+          Timestamp? tsB = dataB['createdAt'];
+          if (tsA == null && tsB == null) return 0;
+          if (tsA == null) return 1;
+          if (tsB == null) return -1;
+          return tsB.compareTo(tsA);
+        });
         Map<DateTime, int> heatMapData = {}; 
         for (var doc in docs) {
           var data = doc.data() as Map<String, dynamic>;
@@ -66,13 +87,21 @@ class MyTokensList extends StatelessWidget {
           children: [
             const Text("Contribution Activity", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             const SizedBox(height: 10),
-            HeatMap(
-              datasets: heatMapData, 
-              colorMode: ColorMode.opacity, 
-              colorsets: const { 1: Colors.green }, 
-              scrollable: true,
-              showText: true, 
-              textColor: Colors.black,
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: HeatMap(
+                datasets: heatMapData, 
+                colorMode: ColorMode.opacity, 
+                colorsets: const { 1: Colors.green }, 
+                scrollable: true,
+                showText: true, 
+                showColorTip: false,
+                textColor: Colors.black,
+              ),
             ),
             const Divider(height: 40),
             const Text("Token History", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -95,6 +124,12 @@ class MyTokensList extends StatelessWidget {
                             ElevatedButton(onPressed: () => _sendEmailLink(context, doc.id), child: const Text("SEND")),
                         ],
                       ),
+                      const SizedBox(height: 4),
+                      if (data['createdAt'] != null)
+                        Text(
+                          "Created: ${_formatDate((data['createdAt'] as Timestamp).toDate())}",
+                          style: TextStyle(fontSize: 12, color: Colors.white54),
+                        ),
                       const SizedBox(height: 8),
                       // FIXED: Show status only for the current provider or show both for Agent
                       if (role == "Travel Agent") 

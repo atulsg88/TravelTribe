@@ -16,10 +16,22 @@ class ProviderHome extends StatelessWidget {
           .where(userRole == "Hotelier" ? 'hotelEmail' : 'cabEmail', isEqualTo: providerEmail).snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        // Sort by createdAt descending (latest first)
+        var docs = snapshot.data!.docs.toList();
+        docs.sort((a, b) {
+          var dataA = a.data() as Map<String, dynamic>;
+          var dataB = b.data() as Map<String, dynamic>;
+          Timestamp? tsA = dataA['createdAt'];
+          Timestamp? tsB = dataB['createdAt'];
+          if (tsA == null && tsB == null) return 0;
+          if (tsA == null) return 1;
+          if (tsB == null) return -1;
+          return tsB.compareTo(tsA);
+        });
         return ListView.builder(
-          itemCount: snapshot.data!.docs.length,
+          itemCount: docs.length,
           itemBuilder: (context, i) {
-            var doc = snapshot.data!.docs[i];
+            var doc = docs[i];
             var data = doc.data() as Map<String, dynamic>;
 
             return Card(

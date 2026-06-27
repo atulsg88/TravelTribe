@@ -36,7 +36,7 @@ class _MainDashboardState extends State<MainDashboard> {
               children: [
                 const Icon(Icons.person, size: 80, color: Colors.blueGrey),
                 Text("Name: ${data['name']}", style: const TextStyle(fontSize: 20)),
-                Text("Business: ${data['businessName'] ?? 'N/A'}", style: const TextStyle(fontSize: 18, color: Colors.blueGrey)),
+                Text("Business: ${data['businessName'] ?? 'N/A'}", style: TextStyle(fontSize: 18, color: Theme.of(context).colorScheme.primary)),
                 Text("Role: ${widget.userRole}"),
                 Text("Email: ${widget.userEmail}"),
                 Text("Phone: ${data['phone'] ?? 'N/A'}", style: const TextStyle(fontWeight: FontWeight.bold)),

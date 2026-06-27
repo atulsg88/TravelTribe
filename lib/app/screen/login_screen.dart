@@ -120,15 +120,15 @@ class _LoginScreenState extends State<LoginScreen> {
           padding: const EdgeInsets.all(30.0),
           child: Column(
             children: [
-              const Icon(
+              Icon(
                 Icons.travel_explore,
                 size: 80,
-                color: Colors.blueGrey,
+                color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 "Travel Trust",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 40),
               TextField(
