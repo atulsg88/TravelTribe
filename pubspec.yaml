@@ -17,6 +17,7 @@ dependencies:
   flutter_heatmap_calendar: ^1.0.1
   mailer: ^6.0.1
   url_launcher: ^6.3.2
+  provider: ^6.1.2
   
 
 dev_dependencies:
