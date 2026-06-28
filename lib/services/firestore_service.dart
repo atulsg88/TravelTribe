@@ -73,4 +73,13 @@ class FirestoreService {
     var doc = await _db.collection('tokens').doc(tokenId).get();
     return TokenModel.fromDoc(doc);
   }
+
+  /// Fetches all tokens for a user (one-shot, not a stream).
+  Future<List<TokenModel>> getTokensOnce(String queryField, String email) async {
+    var snapshot = await _db
+        .collection('tokens')
+        .where(queryField, isEqualTo: email)
+        .get();
+    return snapshot.docs.map((doc) => TokenModel.fromDoc(doc)).toList();
+  }
 }

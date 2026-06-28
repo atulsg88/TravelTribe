@@ -9,6 +9,30 @@ class TokenListViewModel extends ChangeNotifier {
   TokenListViewModel({FirestoreService? firestoreService})
       : _firestoreService = firestoreService ?? FirestoreService();
 
+  // Heatmap filter: '1year', '6months'
+  String _heatmapFilter = '1year';
+
+  // ─── Getters ───
+  String get heatmapFilter => _heatmapFilter;
+
+  /// The start date for the heatmap based on the current filter.
+  DateTime get heatmapStartDate {
+    final now = DateTime.now();
+    if (_heatmapFilter == '6months') {
+      // Use day 1 to avoid overflow (e.g., Aug 31 - 6 months = Feb 31 crash)
+      return DateTime(now.year, now.month - 5, 1);
+    }
+    // 1 year: go back 11 months + day 1
+    return DateTime(now.year - 1, now.month + 1, 1);
+  }
+
+  // ─── Actions ───
+
+  void setHeatmapFilter(String filter) {
+    _heatmapFilter = filter;
+    notifyListeners();
+  }
+
   /// Returns the query field based on user role.
   String _queryField(String role) {
     if (role == 'Travel Agent') return 'agentEmail';
@@ -21,13 +45,16 @@ class TokenListViewModel extends ChangeNotifier {
     return _firestoreService.getTokensStream(_queryField(role), email);
   }
 
-  /// Builds heatmap data from a list of tokens.
+  /// Builds heatmap data from a list of tokens, filtered by the current heatmap range.
   Map<DateTime, int> buildHeatMapData(List<TokenModel> tokens) {
+    final cutoff = heatmapStartDate;
     Map<DateTime, int> data = {};
     for (var token in tokens) {
       if (token.createdAt != null) {
         var date = DateTime(token.createdAt!.year, token.createdAt!.month, token.createdAt!.day);
-        data[date] = (data[date] ?? 0) + 1;
+        if (date.isAfter(cutoff) || date.isAtSameMomentAs(cutoff)) {
+          data[date] = (data[date] ?? 0) + 1;
+        }
       }
     }
     return data;

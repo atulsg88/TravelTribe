@@ -57,8 +57,21 @@ class MyTokensList extends StatelessWidget {
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  const Text("Contribution Activity",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  // Header row with title and filter chips
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Contribution Activity",
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                      Row(
+                        children: [
+                          _buildFilterChip(vm, '6months', '6M'),
+                          const SizedBox(width: 6),
+                          _buildFilterChip(vm, '1year', '1Y'),
+                        ],
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 10),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -66,14 +79,9 @@ class MyTokensList extends StatelessWidget {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: HeatMap(
+                    child: _ScrollableHeatMap(
+                      startDate: vm.heatmapStartDate,
                       datasets: heatMapData,
-                      colorMode: ColorMode.opacity,
-                      colorsets: const {1: Colors.green},
-                      scrollable: true,
-                      showText: true,
-                      showColorTip: false,
-                      textColor: Colors.black,
                     ),
                   ),
                   const Divider(height: 40),
@@ -84,6 +92,31 @@ class MyTokensList extends StatelessWidget {
             },
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(TokenListViewModel vm, String filter, String label) {
+    bool active = vm.heatmapFilter == filter;
+    return GestureDetector(
+      onTap: () => vm.setHeatmapFilter(filter),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: active ? Colors.blueGrey.shade700 : const Color(0xFF2A2A3C),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: active ? Colors.blueGrey : Colors.transparent,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: active ? Colors.white : Colors.white54,
+            fontWeight: active ? FontWeight.bold : FontWeight.normal,
+            fontSize: 13,
+          ),
+        ),
       ),
     );
   }
@@ -137,6 +170,55 @@ class MyTokensList extends StatelessWidget {
               Text("Phone: ${token.agentPhone ?? 'N/A'}"),
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ScrollableHeatMap extends StatefulWidget {
+  final DateTime startDate;
+  final Map<DateTime, int> datasets;
+
+  const _ScrollableHeatMap({
+    super.key,
+    required this.startDate,
+    required this.datasets,
+  });
+
+  @override
+  State<_ScrollableHeatMap> createState() => _ScrollableHeatMapState();
+}
+
+class _ScrollableHeatMapState extends State<_ScrollableHeatMap> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scrollbar(
+      thumbVisibility: true,
+      controller: _scrollController,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        reverse: true,
+        controller: _scrollController,
+        child: HeatMap(
+          startDate: widget.startDate,
+          endDate: DateTime.now(),
+          datasets: widget.datasets,
+          colorMode: ColorMode.opacity,
+          colorsets: const {1: Colors.green},
+          size: 30, // Increased size for clearer month and day text
+          scrollable: false,
+          showText: true,
+          showColorTip: false,
+          textColor: Colors.black,
         ),
       ),
     );
