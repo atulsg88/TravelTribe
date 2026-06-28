@@ -9,7 +9,11 @@ class MyTokensList extends StatelessWidget {
   final String role;
   const MyTokensList({super.key, required this.userEmail, required this.role});
 
-  Future<void> _showSendDialog(BuildContext context, TokenListViewModel vm, String tokenId) async {
+  Future<void> _showSendDialog(
+    BuildContext context,
+    TokenListViewModel vm,
+    String tokenId,
+  ) async {
     final emailCtrl = TextEditingController();
     showDialog(
       context: context,
@@ -18,7 +22,10 @@ class MyTokensList extends StatelessWidget {
         content: TextField(
           controller: emailCtrl,
           keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(labelText: "Customer Email", hintText: "example@mail.com"),
+          decoration: const InputDecoration(
+            labelText: "Customer Email",
+            hintText: "example@mail.com",
+          ),
         ),
         actions: [
           TextButton(
@@ -61,8 +68,13 @@ class MyTokensList extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Contribution Activity",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                      const Text(
+                        "Contribution Activity",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
                       Row(
                         children: [
                           _buildFilterChip(vm, '6months', '6M'),
@@ -85,7 +97,10 @@ class MyTokensList extends StatelessWidget {
                     ),
                   ),
                   const Divider(height: 40),
-                  const Text("Token History", style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Token History",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   ...tokens.map((token) => _buildTokenCard(context, vm, token)),
                 ],
               );
@@ -121,7 +136,11 @@ class MyTokensList extends StatelessWidget {
     );
   }
 
-  Widget _buildTokenCard(BuildContext context, TokenListViewModel vm, TokenModel token) {
+  Widget _buildTokenCard(
+    BuildContext context,
+    TokenListViewModel vm,
+    TokenModel token,
+  ) {
     bool isSendable = token.isFullyApproved;
 
     return Card(
@@ -134,9 +153,16 @@ class MyTokensList extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Status: ${token.overallStatus}",
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                if (role == "Travel Agent" && isSendable && token.overallStatus == 'Approved')
+                Text(
+                  "Status: ${token.overallStatus}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                if (role == "Travel Agent" &&
+                    isSendable &&
+                    token.overallStatus == 'Approved')
                   ElevatedButton(
                     onPressed: () => _showSendDialog(context, vm, token.id),
                     child: const Text("SEND"),
@@ -158,10 +184,17 @@ class MyTokensList extends StatelessWidget {
             else
               Text("My Status: ${token.cabStatus}"),
             const Divider(),
-            const Text("Contact & Business Info:", style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              "Contact & Business Info:",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             if (role == "Travel Agent") ...[
-              Text("Hotel: ${token.hotelBusiness ?? 'N/A'}\nPhone: ${token.hotelPhone ?? 'N/A'}"),
-              Text("Cab: ${token.cabBusiness ?? 'N/A'}\nPhone: ${token.cabPhone ?? 'N/A'}"),
+              Text(
+                "Hotel: ${token.hotelBusiness ?? 'N/A'}\nPhone: ${token.hotelPhone ?? 'N/A'}",
+              ),
+              Text(
+                "Cab: ${token.cabBusiness ?? 'N/A'}\nPhone: ${token.cabPhone ?? 'N/A'}",
+              ),
             ] else if (role == "Hotelier") ...[
               Text("Agent: ${token.agentBusiness ?? 'N/A'}"),
               Text("Phone: ${token.agentPhone ?? 'N/A'}"),
@@ -180,11 +213,7 @@ class _ScrollableHeatMap extends StatefulWidget {
   final DateTime startDate;
   final Map<DateTime, int> datasets;
 
-  const _ScrollableHeatMap({
-    super.key,
-    required this.startDate,
-    required this.datasets,
-  });
+  const _ScrollableHeatMap({required this.startDate, required this.datasets});
 
   @override
   State<_ScrollableHeatMap> createState() => _ScrollableHeatMapState();
@@ -206,7 +235,6 @@ class _ScrollableHeatMapState extends State<_ScrollableHeatMap> {
       controller: _scrollController,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        reverse: true,
         controller: _scrollController,
         child: HeatMap(
           startDate: widget.startDate,
