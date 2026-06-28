@@ -236,17 +236,20 @@ class _ScrollableHeatMapState extends State<_ScrollableHeatMap> {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         controller: _scrollController,
-        child: HeatMap(
-          startDate: widget.startDate,
-          endDate: DateTime.now(),
-          datasets: widget.datasets,
-          colorMode: ColorMode.opacity,
-          colorsets: const {1: Colors.green},
-          size: 30, // Increased size for clearer month and day text
-          scrollable: false,
-          showText: true,
-          showColorTip: false,
-          textColor: Colors.black,
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: HeatMap(
+            startDate: widget.startDate,
+            endDate: DateTime.now(),
+            datasets: widget.datasets,
+            colorMode: ColorMode.opacity,
+            colorsets: const {1: Colors.green},
+            size: 30, // Increased size for clearer month and day text
+            scrollable: false,
+            showText: true,
+            showColorTip: false,
+            textColor: Colors.black,
+          ),
         ),
       ),
     );
