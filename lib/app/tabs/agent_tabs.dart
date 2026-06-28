@@ -12,8 +12,24 @@ class AgentHome extends StatefulWidget {
 class _AgentHomeState extends State<AgentHome> {
   String? _selectedHotelEmail;
   String? _selectedCabEmail;
+  String _sortFilter = 'All'; // 'All', 'Hotelier', 'Cab Driver'
 
   void _showUnifiedForm() async {
+    if (_selectedHotelEmail == null || _selectedCabEmail == null) {
+      String missing = '';
+      if (_selectedHotelEmail == null && _selectedCabEmail == null) {
+        missing = 'a Hotel and a Cab';
+      } else if (_selectedHotelEmail == null) {
+        missing = 'a Hotel';
+      } else {
+        missing = 'a Cab';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select $missing before creating a token.')),
+      );
+      return;
+    }
+
     final roomTypeCtrl = TextEditingController();
     final carTypeCtrl = TextEditingController();
     DateTimeRange? selectedRange;
@@ -92,35 +108,109 @@ class _AgentHomeState extends State<AgentHome> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance.collection('users')
-              .where('role', whereIn: ['Hotelier', 'Cab Driver']).snapshots(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-            var providers = snapshot.data!.docs;
-            return ListView.builder(
-              itemCount: providers.length,
-              itemBuilder: (context, i) {
-                var p = providers[i];
-                var data = p.data() as Map<String, dynamic>;
-                return ListTile(
-                  leading: Icon(p['role'] == "Hotelier" ? Icons.hotel : Icons.car_rental),
-                  title: Text(data['businessName'] ?? data['name']),
-                  subtitle: Text("${p['role']} | Phone: ${data['phone'] ?? 'N/A'}"),
-                  trailing: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        if (p['role'] == "Hotelier") _selectedHotelEmail = p.id;
-                        if (p['role'] == "Cab Driver") _selectedCabEmail = p.id;
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Selected ${data['businessName'] ?? p.id}")));
+        Column(
+          children: [
+            // Sort/Filter row
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.sort, color: Colors.white70, size: 20),
+                  const SizedBox(width: 8),
+                  const Text("Sort by:", style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 8),
+                  _buildSortChip("All", Icons.list),
+                  const SizedBox(width: 6),
+                  _buildSortChip("Hotelier", Icons.hotel, label: "Hotels"),
+                  const SizedBox(width: 6),
+                  _buildSortChip("Cab Driver", Icons.car_rental, label: "Cabs"),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            // Provider list
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _sortFilter == 'All'
+                    ? FirebaseFirestore.instance.collection('users')
+                        .where('role', whereIn: ['Hotelier', 'Cab Driver']).snapshots()
+                    : FirebaseFirestore.instance.collection('users')
+                        .where('role', isEqualTo: _sortFilter).snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                  var providers = snapshot.data!.docs;
+                  if (providers.isEmpty) {
+                    return Center(child: Text("No ${_sortFilter == 'All' ? 'providers' : _sortFilter == 'Hotelier' ? 'hotels' : 'cabs'} found.", style: const TextStyle(color: Colors.white54)));
+                  }
+                  return ListView.builder(
+                    itemCount: providers.length,
+                    itemBuilder: (context, i) {
+                      var p = providers[i];
+                      var data = p.data() as Map<String, dynamic>;
+                      bool isHotel = p['role'] == "Hotelier";
+                      bool isSelected = isHotel
+                          ? _selectedHotelEmail == p.id
+                          : _selectedCabEmail == p.id;
+                      // Check if another provider of same type is already selected
+                      bool otherSelected = isHotel
+                          ? (_selectedHotelEmail != null && _selectedHotelEmail != p.id)
+                          : (_selectedCabEmail != null && _selectedCabEmail != p.id);
+
+                      return Card(
+                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        child: ListTile(
+                          leading: Icon(
+                            isHotel ? Icons.hotel : Icons.car_rental,
+                            color: isSelected ? Colors.greenAccent : Colors.white54,
+                          ),
+                          title: Text(data['businessName'] ?? data['name']),
+                          subtitle: Text("${p['role']} | Phone: ${data['phone'] ?? 'N/A'}"),
+                          trailing: isSelected
+                              ? ElevatedButton.icon(
+                                  onPressed: () {
+                                    setState(() {
+                                      if (isHotel) {
+                                        _selectedHotelEmail = null;
+                                      } else {
+                                        _selectedCabEmail = null;
+                                      }
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text("Deselected ${data['businessName'] ?? p.id}")),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.check_circle, size: 18),
+                                  label: const Text("Selected"),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green.shade700,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                )
+                              : ElevatedButton(
+                                  onPressed: otherSelected
+                                      ? null // Disable if another of the same type is already selected
+                                      : () {
+                                          setState(() {
+                                            if (isHotel) {
+                                              _selectedHotelEmail = p.id;
+                                            } else {
+                                              _selectedCabEmail = p.id;
+                                            }
+                                          });
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text("Selected ${data['businessName'] ?? p.id}")),
+                                          );
+                                        },
+                                  child: const Text("Select"),
+                                ),
+                        ),
+                      );
                     },
-                    child: const Text("Select"),
-                  ),
-                );
-              },
-            );
-          },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
         Positioned(
           bottom: 16,
@@ -132,6 +222,23 @@ class _AgentHomeState extends State<AgentHome> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSortChip(String filter, IconData icon, {String? label}) {
+    bool active = _sortFilter == filter;
+    return ChoiceChip(
+      avatar: Icon(icon, size: 16, color: active ? Colors.white : Colors.white54),
+      label: Text(label ?? filter),
+      selected: active,
+      selectedColor: Colors.blueGrey.shade700,
+      backgroundColor: const Color(0xFF2A2A3C),
+      labelStyle: TextStyle(
+        color: active ? Colors.white : Colors.white54,
+        fontWeight: active ? FontWeight.bold : FontWeight.normal,
+      ),
+      onSelected: (_) => setState(() => _sortFilter = filter),
+      side: BorderSide(color: active ? Colors.blueGrey : Colors.transparent),
     );
   }
 }
